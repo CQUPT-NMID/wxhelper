@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.cqupt.nmid.wxhelper.wxhelper.dao.ItemDao">
+    <select id="searchByName" resultMap="baseItemMap" parameterType="java.lang.String">
+    SELECT item.id,photo,`itemname`,likenum,collectnum,commentnum from item,era,`type` where item.era_id =era.id and item.type_id = type.id and item.`itemname` like #{value};
+  </select>
+    <select id="getItemsByType" resultMap="baseItemMap" parameterType="java.lang.Integer">
+    SELECT item.id,photo,`itemname`,likenum,collectnum,commentnum from item,era,`type` where item.era_id =era.id and item.type_id = type.id and item.type_id = #{id};
+  </select>
+    <select id="getItemsByEra" resultMap="baseItemMap" parameterType="java.lang.Integer">
+    SELECT item.id,photo,`itemname`,likenum,collectnum,commentnum from item,era,`type` where item.era_id =era.id and item.type_id = type.id and item.era_id = #{id};
+  </select>
+    <select id="getItemsByCollection" resultMap="baseItemMap">
+    SELECT item.id,photo,`itemname`,likenum,collectnum,commentnum from item,era,`type` where item.era_id =era.id and item.type_id = type.id order by collectnum;
+  </select>
+    <select id="getItemsByComment" resultMap="baseItemMap">
+    SELECT item.id,photo,`itemname`,likenum,collectnum,commentnum from item,era,`type` where item.era_id =era.id and item.type_id = type.id order by commentnum;
+  </select>
+    <select id="getItemsByClick" resultMap="baseItemMap" >
+    SELECT item.id,photo,`itemname`,likenum,collectnum,commentnum from item,era,`type` where item.era_id =era.id and item.type_id = type.id order by likenum;
+  </select>
+    <select id="getTypeId" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select id from `type` where `type`.typename = #{typename};
+    </select>
+    <select id="getEraId" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select id from `era` where `era`.eraname = #{era};
+    </select>
+    <select id="getItemById" parameterType="java.lang.Integer" resultMap="itemMap">
+            SELECT item.id,photo,era.eraname,intro,video,`itemname`,`type`.typename ,likenum,collectnum,commentnum from item,era,`type` where item.era_id =era.id and item.type_id = type.id and item.id = #{id};
+    </select>
+    <insert id="saveItem">
+        insert into item(era_id,intro,itemname,type_id) values (#{eraId},#{intro},#{itemname},#{typeId});
+    </insert>
+    <update id="updatePhoto">
+        update item set photo =#{photo} where id = #{id};
+    </update>
+    <update id="updateVideo">
+        update item set video =#{video} where id = #{id};
+    </update>
+    <select id="getAll" resultMap="baseItemMap">
+            SELECT item.id,photo,`itemname`,likenum,collectnum,commentnum from item,era,`type` where item.era_id =era.id and item.type_id = type.id;
+    </select>
+
+    <insert id="saveType" parameterType="java.lang.String" >
+        <selectKey keyColumn="id" keyProperty="id" resultType="int">
+            select last_insert_id();
+        </selectKey>
+        INSERT type (typename) values (#{typename});
+    </insert>
+    <insert id="saveEra" parameterType="Era">
+        insert into era(eraname,begintime,endtime) values (#{era.eraname},#{era.begintime},#{era.endtime})
+    </insert>
+    <insert id="saveHistory">
+        insert into history(item_id,user_id,`time`) values (#{item_id},#{user_id}.#{date});
+    </insert>
+    <resultMap id="itemMap" type="Item">
+        <id column="id" property="id" javaType="java.lang.Integer"></id>
+        <result column="eraname" property="era" javaType="java.lang.String"></result>
+        <result column="intro" property="intro"></result>
+
+        <result column="video" property="video"></result>
+        <result column="itemname" property="name"></result>
+        <result column="typename" property="type" javaType="java.lang.String"></result>
+        <result column="collectnum" property="collectnum"></result>
+        <result column="commentnum" property="commentnum"></result>
+        <result column="likenum" property="likenum"></result>
+    </resultMap>
+    <resultMap id="baseItemMap" type="baseItem">
+        <id column="id" property="id" javaType="java.lang.Integer"></id>
+
+        <result column="itemname" property="name"></result>
+        <result column="collectnum" property="collectnum"></result>
+        <result column="commentnum" property="commentnum"></result>
+        <result column="likenum" property="likenum"></result>
+    </resultMap>
+</mapper>

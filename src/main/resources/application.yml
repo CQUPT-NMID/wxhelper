@@ -1,0 +1,70 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://120.24.93.68:3306/wxhelper?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    username: root
+    password: 123456
+    type: com.alibaba.druid.pool.DruidDataSource
+    platform: mysql
+    initialSize: 1
+    minIdle: 3
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 30000
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    filters: stat,wall,slf4j
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  profiles:
+    active: dev
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: cn.edu.cqupt.nmid.wxhelper.wxhelper.po
+server:
+  tomcat:
+    accesslog:
+      encoding: UTF-8
+    uri-encoding: UTF-8
+---
+spring:
+  profiles: dev
+server:
+  port: 8080
+logging:
+  level:
+   root: error
+   cn.edu.cqupt.nmid.wxhelper.wxhelper: error
+  file:
+    name: wxhelp-log/wxhelper-dev.log
+    clean-history-on-start: true
+debug: true
+myproperties:
+  basephotourl: C:\Users\11726\Desktop\images\
+---
+spring:
+  profiles: pro
+server:
+  port: 80
+logging:
+  level:
+    root: error
+    cn.edu.cqupt.nmid.wxhelper.wxhelper: error
+  file:
+    clean-history-on-start: true
+    name: wxhelper-log/wxhelper-pro.log
+debug: false
+myproperties:
+  basephotourl: /usr/local/src/wxhelper/images/
