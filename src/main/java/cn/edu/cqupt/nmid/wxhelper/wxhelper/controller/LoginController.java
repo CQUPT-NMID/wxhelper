@@ -5,13 +5,10 @@ import cn.edu.cqupt.nmid.wxhelper.wxhelper.enums.Status;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.User;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.ResponseResult;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.Result;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.Role;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.WxLoginUtil;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.service.UserService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.sun.org.apache.bcel.internal.generic.DASTORE;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
@@ -25,18 +22,19 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 
-
+@Api(description = "登陆")
 @Controller
+@RequestMapping(value = "/api",produces = {"application/json"})
 public class LoginController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Qualifier(value = "userServiceImpl")
     @Autowired
     private UserService userService;
+
     @Autowired
     private JwtConfig jwtConfig;
 
@@ -60,11 +58,12 @@ public class LoginController {
                 throw new Exception("无法获取openid");
             }
 
-            User user = new User(openId, nickName, gender == 1 ? "男" : "女", city, province, country, avatarUrl);
+            User user = new User(openId, nickName, gender , city, province, country, avatarUrl);
             System.out.println(user);
+
             userService.login(user);
             //获取并返回token
-            String token = jwtConfig.createToken(openId);
+            String token = jwtConfig.createToken(openId, Role.USER);
             HashMap<String, Object> datamap = new HashMap<>();
             datamap.put("token", token);
             return Result.success(datamap);
@@ -82,8 +81,9 @@ public class LoginController {
      */
     @RequestMapping(value = "/loginIn", method = {RequestMethod.GET})
     @ResponseBody
-    public Result LoginForTest(String userid) {
-        String token = jwtConfig.createToken(userid);
+    @ApiIgnore
+    public Result LoginForTest(@RequestParam String userid) {
+        String token = jwtConfig.createToken(userid,Role.USER);
         HashMap<String, Object> map = new HashMap<>();
         map.put("token", token);
         return Result.success(map);
@@ -100,9 +100,10 @@ public class LoginController {
     public Result Test() {
         ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = sra.getRequest();
-        Object userid = request.getAttribute("userid");
+        String userid = (String) request.getAttribute("userid");
         HashMap<String, Object> map = new HashMap<>();
         map.put("userid", userid);
         return Result.success(map);
     }
+
 }

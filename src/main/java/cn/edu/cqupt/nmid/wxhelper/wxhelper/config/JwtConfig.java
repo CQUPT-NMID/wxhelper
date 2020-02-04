@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author MaYunHao
@@ -25,19 +27,24 @@ public class JwtConfig {
 
     private String header;
 
+    public static final String ROLE = "ROLE";
+
     /**
      * 生成token
      * @param userid   用户id
      * @return
      */
-    public String createToken (String userid){
+    public String createToken (String userid, String role){
         Date nowDate = new Date();
         //过期时间
         Date expireDate = new Date(nowDate.getTime() + expire * 1000);
 
+            HashMap<String, Object> map = new HashMap<>();
+            map.put(ROLE, role);
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setSubject(userid)
+                .setClaims(map)
                 .setIssuedAt(nowDate)
                 .setExpiration(expireDate)
                 .signWith(SignatureAlgorithm.HS512, secret)

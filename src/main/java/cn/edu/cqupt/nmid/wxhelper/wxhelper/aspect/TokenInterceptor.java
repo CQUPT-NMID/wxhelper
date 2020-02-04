@@ -1,6 +1,7 @@
 package cn.edu.cqupt.nmid.wxhelper.wxhelper.aspect;
 
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.config.JwtConfig;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.Role;
 import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -30,6 +31,7 @@ public class TokenInterceptor extends HandlerInterceptorAdapter {
                              Object handler) throws SignatureException {
         /** 地址过滤 */
         String uri = request.getRequestURI();
+        System.out.println(uri);
         if (uri.contains("/login") || uri.contains("/error")) {
             return true;
         }
@@ -50,6 +52,14 @@ public class TokenInterceptor extends HandlerInterceptorAdapter {
             }
         } catch (Exception e) {
             throw new SignatureException(jwtConfig.getHeader() + "失效，请重新登录。");
+        }
+
+        //管理端登陆
+        if (uri.contains("/admin")){
+            String role= (String) claims.get(JwtConfig.ROLE);
+            if(role != Role.ADMIN){
+                return false;
+            }
         }
 
         /** 设置 userid 用户身份ID */

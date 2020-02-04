@@ -112,6 +112,12 @@
             <version>3.4.0</version>
         </dependency>
 
+<!--        分页助手-->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper</artifactId>
+            <version>5.1.11</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -29,7 +29,6 @@ spring:
   servlet:
     multipart:
       max-file-size: 10MB
-
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: cn.edu.cqupt.nmid.wxhelper.wxhelper.po
@@ -46,10 +45,11 @@ config:
     expire: 3600
     #header 名称
     header: token
+
 #文件存储及访问
 myproperties:
   file-save-location: /usr/local/src/wxhelper/images/
-  file-visit-url: http://itrover.cn/wxhelper/images/
+  file-visit-url: https://wxhelper.itrover.cn/wxhelper/images/
 ---
 spring:
   profiles: dev

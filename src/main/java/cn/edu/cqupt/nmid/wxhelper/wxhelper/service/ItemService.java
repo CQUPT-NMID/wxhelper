@@ -1,8 +1,10 @@
 package cn.edu.cqupt.nmid.wxhelper.wxhelper.service;
 
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.MyException;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.BaseItem;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Era;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Item;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Type;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -27,7 +29,9 @@ public interface ItemService {
 
     Integer getEraId(String era);
 
-    void saveItem(String itemname, String intro, String typename, String era, MultipartFile video, MultipartFile[] photo) throws Exception;
+    Integer saveItemAndFile(String itemname, String intro, String typename, String era, MultipartFile video, MultipartFile[] photo) throws Exception;
+
+    Integer saveItem(String itemname, String intro, String typename, String era, String video, List<String> photo);
 
     List<BaseItem> getAll();
 
@@ -38,4 +42,26 @@ public interface ItemService {
     Item getItemById(Integer id);
 
     void updatePhoto(Integer itemid, MultipartFile[] photos) throws IOException;
+
+    void deleteItem(Integer itemid);
+
+    void updateVedio(Integer itemid, MultipartFile video) throws IOException;
+
+    void updateItem(Item item);
+
+    void deleteEra(Integer id);
+
+    void updateEra(Era era);
+
+    List<Era> getAllEra();
+
+    List<String> uploadPhoto(MultipartFile[] photos) throws IOException;
+
+    void saveTpye(String typename);
+
+    void deleteType(Type type) throws MyException;
+
+    void updateType(Type type);
+
+    List<Type> getAllType();
 }

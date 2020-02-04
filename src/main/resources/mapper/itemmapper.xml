@@ -36,7 +36,7 @@
         <include refid="baseSet"></include> order by likenum;
   </select>
     <select id="getItemById" parameterType="java.lang.Integer" resultMap="itemMap">
-            SELECT item.id,photo,era.eraname,intro,video,`itemname`,`type`.typename ,likenum,collectnum,commentnum from item,era,`type` where item.era_id =era.id and item.type_id = type.id and item.id = #{id};
+            SELECT id,imap,purl,era_name,intro,video,itemname,type_name ,likenum,collectnum,commentnum from itemview where id= #{id};
     </select>
 
     <!--    类型-->
@@ -50,12 +50,17 @@
     <select id="getEraId" parameterType="java.lang.String" resultType="java.lang.Integer">
         select id from `era` where `era`.eraname = #{era};
     </select>
-
-
-
-
+    <select id="getAllEra">
+        select * from  era;
+    </select>
+    <select id="getAllType">
+         select * from  `type`;
+    </select>
     <update id="updateVideo">
-        update item set video =#{video} where id = #{id};
+        update item set video =#{video} where id = #{itemid};
+    </update>
+    <update id="updateEra">
+        update era set eraname=#{eraname},begintime=#{begintime},endtime=#{endtime} where id = #{id};
     </update>
     <insert id="updatePhoto">
         insert photo(item_id,url) values (#{itemid},#{photo})
@@ -75,6 +80,26 @@
     <insert id="saveItem" parameterType="Item" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         insert item (`itemname`,intro,era_name,type_name) values(#{name},#{intro},#{era},#{type});
     </insert>
+
+    <update id="updateItem" parameterType="Item">
+        update item set itemname = #{name},intro = #{intro},era_name = #{era},type_name = #{type} where id=#{id};
+    </update>
+
+    <update id="updateType">
+        update type set typename = #{typename} where id = #{id};
+    </update>
+    <delete id="deleteItemById" parameterType="java.lang.Integer">
+        delete from item where id = #{itemid};
+    </delete>
+    <delete id="deleteEraById" parameterType="java.lang.Integer">
+        delete from era where id = #{id};
+    </delete>
+    <delete id="deleteTypeById" parameterType="java.lang.Integer">
+        delete from `type` where id = #{id};
+    </delete>
+    <delete id="deleteTypeByName" parameterType="java.lang.String">
+        delete from `type` where typename = #{name};
+    </delete>
     <resultMap id="itemMap" type="Item">
         <id column="id" property="id" javaType="java.lang.Integer"></id>
         <result column="eraname" property="era" javaType="java.lang.String"></result>

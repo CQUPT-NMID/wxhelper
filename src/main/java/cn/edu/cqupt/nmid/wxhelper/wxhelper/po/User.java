@@ -4,13 +4,13 @@ package cn.edu.cqupt.nmid.wxhelper.wxhelper.po;
 public class User {
     private String id;
     private String nickname;
-    private String gender;
+    private Integer gender;
     private String city;
     private String province;
     private String country;
     private String avater;
 
-    public User(String  id, String nickname, String gender, String city, String province, String country, String avater) {
+    public User(String  id, String nickname, Integer gender, String city, String province, String country, String avater) {
         this.id = id;
         this.nickname = nickname;
         this.gender = gender;
@@ -56,11 +56,11 @@ public class User {
         this.nickname = nickname;
     }
 
-    public String getGender() {
+    public Integer getGender() {
         return gender;
     }
 
-    public void setGender(String gender) {
+    public void setGender(Integer gender) {
         this.gender = gender;
     }
 

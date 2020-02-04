@@ -5,6 +5,7 @@ import cn.edu.cqupt.nmid.wxhelper.wxhelper.enums.Status;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Comment;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.User;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.service.CommentService;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.Result;
 import com.alibaba.druid.support.spring.stat.annotation.Stat;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
@@ -15,8 +16,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.swing.text.html.ObjectView;
+import java.lang.annotation.Retention;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -27,8 +35,9 @@ import java.util.List;
  * @date 2019/12/12 20:52
  */
 
+@Api(value = "/api/comment",description = "评论相关")
 @RestController
-@RequestMapping("/comment")
+@RequestMapping("/api/comment")
 public class CommentController {
 
     private Logger logger = LoggerFactory.getLogger(CommentController.class);
@@ -36,78 +45,92 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
+    /**
+     * 发评论
+     * @param itemid  展品id
+     * @param content 评论内容
+     * @return
+     */
     @ApiOperation("发评论")
     @PostMapping("/publishComment")
-    public String publishComment( HttpSession session,
-                                 @RequestParam @ApiParam(value = "展品id ",required = true) Integer itemid,
+    public Result publishComment(@RequestParam @ApiParam(value = "展品id ",required = true) Integer itemid,
                                  @RequestParam @ApiParam(value = "评论内容",required = true) String content){
-        Status status = null;
-        User user = (User) session.getAttribute("user");
         try{
-            commentService.publishComment(itemid,content,user.getId());
-            status = Status.SUCCESS;
+            String userId = getUserId();
+            commentService.publishComment(itemid,content,userId);
+            return Result.success();
         }catch (Exception e){
             logger.error(e.getMessage());
-            status = Status.FAISE;
+            return Result.failure(Status.SysError);
         }
-        JSONObject returnData = new JSONObject();
-        returnData.put("status",status.getCode());
-        returnData.put("msg",status.getMessage());
-        return returnData.toJSONString();
     }
 
+    /**
+     * 拉去一个展品所有的评论
+     * @param itemid  展品id
+     * @return
+     */
     @ApiOperation("获取一个展品的所有评论")
     @GetMapping("/getCommentByItemId")
-    public String getCommentByItemId( HttpSession session,
-                                     @RequestParam @ApiParam(value = "展品id",required = true) Integer itemid){
-        JSONObject returnData = new JSONObject();
-        Status status = null;
+    public Result getCommentByItemId(@RequestParam @ApiParam(value = "展品id",required = true) Integer itemid){
         try{
             List<Comment> comments = commentService.getCommentByItemId(itemid);
-            returnData.put("comments",comments);
-            status = Status.SUCCESS;
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("comments",comments);
+            return Result.success(map);
         }catch (Exception e){
             logger.error(e.getMessage());
-            status = Status.FAISE;
+            return Result.failure(Status.SysError);
         }
-        returnData.put("status",status.getCode());
-        returnData.put("msg",status.getMessage());
-        return returnData.toJSONString();
     }
 
-    @ApiOperation("获取一个用户所有的评论")
-    @GetMapping("/getCommentByUserId")
-    public String getCommentByUserId( HttpSession session){
-        JSONObject returnData = new JSONObject();
-        Status status = null;
-        try{
-            User user = (User) session.getAttribute("user");
-            List<Comment> comments = commentService.getCommentByUserId(user.getId());
-            returnData.put("comments",comments);
-            status = Status.SUCCESS;
-        }catch (Exception e){
-            logger.error(e.getMessage());
-            status = Status.FAISE;
-        }
-        returnData.put("status",status.getCode());
-        returnData.put("msg",status.getMessage());
-        return returnData.toJSONString();
-    }
 
+
+    /**
+     * 通过评论id删除评论
+     * @param commentid
+     * @return
+     */
     @ApiOperation("通过评论id删除评论")
     @GetMapping("/deleteCommentByCommentId")
-    public String deleteCommentByCommentId( HttpSession session,@RequestParam Integer commentid){
-        JSONObject returnData = new JSONObject();
-        Status status = null;
+    public Result deleteCommentByCommentId(@RequestParam Integer commentid){
         try{
             commentService.deleteCommentByCommentId(commentid);
-            status = Status.SUCCESS;
+            return Result.success();
         }catch (Exception e){
             logger.error(e.getMessage());
-            status = Status.FAISE;
+            return Result.failure(Status.SysError);
         }
-        returnData.put("status",status.getCode());
-        returnData.put("msg",status.getMessage());
-        return returnData.toJSONString();
     }
+
+    /**
+     * 获取用户的评论记录
+     * @return
+     */
+    @ApiOperation("获取一个用户所有的评论")
+    @GetMapping("/getUserComments")
+    public Result getUserComments(){
+        try{
+            String userId = getUserId();
+            List<Comment> comments = commentService.getCommentByUserId(userId);
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("comments",comments);
+            return Result.success(map);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            return Result.failure(Status.SysError);
+        }
+    }
+
+    /**
+     * 从request中获取userid
+     * @return
+     */
+    private String getUserId(){
+        ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = sra.getRequest();
+        String userid = (String) request.getAttribute("userid");
+        return userid;
+    }
+
 }

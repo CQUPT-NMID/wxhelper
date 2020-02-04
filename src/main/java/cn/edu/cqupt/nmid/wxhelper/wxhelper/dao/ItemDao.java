@@ -3,6 +3,7 @@ package cn.edu.cqupt.nmid.wxhelper.wxhelper.dao;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.BaseItem;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Era;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Item;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Type;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.ResultType;
@@ -97,4 +98,22 @@ public interface ItemDao {
     Item getItemById(Integer id);
 
     Integer saveItem(Item item);
+
+    void deleteItemById(Integer itemid);
+
+    void updateItem(Item item);
+
+    void deleteEraById(Integer id);
+
+    void updateEra(Era era);
+
+    List<Era> getAllEra();
+
+    void deleteTypeById(Integer id);
+
+    void deleteTypeByName(String name);
+
+    void updateType(Type type);
+
+    List<Type> getAllType();
 }

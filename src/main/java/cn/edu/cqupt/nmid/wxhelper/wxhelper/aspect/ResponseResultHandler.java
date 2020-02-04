@@ -23,7 +23,9 @@ import javax.servlet.http.HttpServletRequest;
 @ControllerAdvice
 public class ResponseResultHandler implements ResponseBodyAdvice<Object> {
 
-    //标记名称
+    /**
+     * 标记名称，判断时候修改返回体
+     */
     public static final String RESPONSE_RESULT_ANN = "RESPONSE_RESULT_ANN";
 
     /**

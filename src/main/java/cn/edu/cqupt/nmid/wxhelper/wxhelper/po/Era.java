@@ -8,6 +8,7 @@ package cn.edu.cqupt.nmid.wxhelper.wxhelper.po;
  */
 
 public class Era {
+    public Integer id;
     public String eraname;
     public String begintime;
     public String endtime;
@@ -21,7 +22,15 @@ public class Era {
         this.endtime = endtime;
     }
 
-    public String getEraname() {
+     public Integer getId() {
+         return id;
+     }
+
+     public void setId(Integer id) {
+         this.id = id;
+     }
+
+     public String getEraname() {
         return eraname;
     }
 

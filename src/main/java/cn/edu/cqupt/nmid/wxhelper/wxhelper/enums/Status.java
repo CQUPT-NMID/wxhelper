@@ -17,10 +17,16 @@ public enum Status {
     Forbidden(403,"禁止"),
     //没有找到资源
     NotFound(404,"没找到"),
+    //服务器异常
+    SysError(500,"服务器异常"),
     //参数错误
     PARAM_IS_INVALID(1001,"参数无效"),
     //用户未登录
-    USER_NOT_LOGIN_IN(2001,"用户未登录");
+    USER_NOT_LOGIN_IN(2001,"用户未登录"),
+    //用户名或密码错误
+    USER_LOGIN_FLASE(2002,"用户名或密码错误");
+    //不可添加重复数据
+
 
     private String message;
     private  int code;

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -28,8 +29,8 @@ import java.util.List;
  * @description
  * @date 2019/12/9 18:34
  */
-
-@RestController("/user")
+@Api(value = "/api/user",description = "用户相关")
+@RestController("/api/user")
 public class UserController {
 
 
@@ -51,7 +52,10 @@ public class UserController {
         return userid;
     }
 
-
+    /**
+     * 获取用户的访问历史
+     * @return
+     */
     @ApiOperation(value = "获取用户历史")
     @GetMapping("/getHistory")
     public Result getHistory(){
@@ -62,20 +66,28 @@ public class UserController {
         return Result.success(map);
     }
 
+    /**
+     * 给展品点赞
+     * @param itemid
+     * @return
+     */
     @ApiOperation("点赞")
     @GetMapping("/likeItem")
-    public String likeItem( HttpSession session,Integer itemid){
-        User user = (User)session.getAttribute("user");
-
+    @ApiIgnore
+    public String likeItem(@RequestParam(required = true) Integer itemid){
+        String userId = getUserId();
         //让item的like数量+1；
 
         //让用户与item关联，及让用户喜欢的表增加该条记录
 
         return  "";
     }
+
+
     @ApiOperation("取消点赞")
     @GetMapping("dislikeItem")
-    public String dislikeItem( HttpSession session,Integer itemid){
+    @ApiIgnore
+    public String dislikeItem(@RequestParam Integer itemid){
 
         return "";
     }
