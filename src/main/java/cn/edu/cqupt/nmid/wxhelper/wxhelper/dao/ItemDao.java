@@ -86,15 +86,15 @@ public interface ItemDao {
 
     Integer saveItem(String itemname, String intro, Integer typeId, Integer eraId);
 
-
-    void updatePhoto(Integer id, String photo);
+    void updatePhoto(Integer itemid, String photo);
 
     List<BaseItem> getAll();
 
-    void updateVideo(Integer id, MultipartFile video);
+    void updateVideo(Integer itemid, String video);
 
     void saveHistory(Integer item_id, String user_id, Date date);
 
     Item getItemById(Integer id);
 
+    Integer saveItem(Item item);
 }

@@ -1,22 +1,21 @@
 package cn.edu.cqupt.nmid.wxhelper.wxhelper.po;
 
-import net.bytebuddy.implementation.bytecode.assign.TypeCasting;
 
 public class User {
     private String id;
     private String nickname;
     private String gender;
     private String city;
-    private String provice;
+    private String province;
     private String country;
     private String avater;
 
-    public User(String  id, String nickname, String gender, String city, String provice, String country, String avater) {
+    public User(String  id, String nickname, String gender, String city, String province, String country, String avater) {
         this.id = id;
         this.nickname = nickname;
         this.gender = gender;
         this.city = city;
-        this.provice = provice;
+        this.province = province;
         this.country = country;
         this.avater = avater;
     }
@@ -25,6 +24,13 @@ public class User {
     public User() {
     }
 
+    public String getProvince() {
+        return province;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
+    }
 
     public String  getId() {
         return id;
@@ -66,13 +72,6 @@ public class User {
         this.city = city;
     }
 
-    public String getProvice() {
-        return provice;
-    }
-
-    public void setProvice(String provice) {
-        this.provice = provice;
-    }
 
     public String getCountry() {
         return country;
@@ -89,7 +88,7 @@ public class User {
                 ", nickname='" + nickname + '\'' +
                 ", gender='" + gender + '\'' +
                 ", city='" + city + '\'' +
-                ", provice='" + provice + '\'' +
+                ", province='" + province + '\'' +
                 ", country='" + country + '\'' +
                 ", avater='" + avater + '\'' +
                 '}';

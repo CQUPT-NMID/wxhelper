@@ -12,9 +12,9 @@ import java.util.List;
 
 public class BaseItem {
     private Integer id;
-    private List<String> photo;
-    private String name;
 
+    private List<String> photos;
+    private String name;
     private Integer collectnum;
     private Integer likenum;
     private Integer commentnum;
@@ -27,14 +27,6 @@ public class BaseItem {
         this.id = id;
     }
 
-    public List<String> getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(List<String> photo) {
-        this.photo = photo;
-    }
-
     public String getName() {
         return name;
     }
@@ -42,6 +34,7 @@ public class BaseItem {
     public void setName(String name) {
         this.name = name;
     }
+
 
     public Integer getCollectnum() {
         return collectnum;
@@ -67,11 +60,19 @@ public class BaseItem {
         this.commentnum = commentnum;
     }
 
+    public List<String> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<String> photos) {
+        this.photos = photos;
+    }
+
     @Override
     public String toString() {
         return "BaseItem{" +
                 "id=" + id +
-                ", photo='" + photo + '\'' +
+                ", photos=" + photos +
                 ", name='" + name + '\'' +
                 ", collectnum=" + collectnum +
                 ", likenum=" + likenum +

@@ -38,6 +38,18 @@ server:
     accesslog:
       encoding: UTF-8
     uri-encoding: UTF-8
+config:
+  jwt:
+    # 加密密钥
+    secret: A0B1C2D3E4F5G6H7I8J9KALBMCNDOEPFQ0R1S2T3U4V5W6X7Y8Z9
+    # token有效时长
+    expire: 3600
+    #header 名称
+    header: token
+#文件存储及访问
+myproperties:
+  file-save-location: /usr/local/src/wxhelper/images/
+  file-visit-url: http://itrover.cn/wxhelper/images/
 ---
 spring:
   profiles: dev
@@ -51,8 +63,7 @@ logging:
     name: wxhelp-log/wxhelper-dev.log
     clean-history-on-start: true
 debug: true
-myproperties:
-  basephotourl: C:\Users\11726\Desktop\images\
+
 ---
 spring:
   profiles: pro
@@ -66,5 +77,4 @@ logging:
     clean-history-on-start: true
     name: wxhelper-log/wxhelper-pro.log
 debug: false
-myproperties:
-  basephotourl: /usr/local/src/wxhelper/images/
+

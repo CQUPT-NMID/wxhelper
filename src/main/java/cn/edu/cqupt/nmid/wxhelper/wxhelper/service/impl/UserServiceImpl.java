@@ -20,7 +20,8 @@ public class UserServiceImpl implements UserService {
     public User login(User loginUser) {
         User user = userDao.login(loginUser.getId());
         if(user == null){
-            user = userDao.saveUser(loginUser);
+            userDao.saveUser(loginUser);
+            user = loginUser;
         }
         return user;
     }

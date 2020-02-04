@@ -4,6 +4,7 @@ import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.BaseItem;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Item;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.service.ItemService;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.service.impl.ItemServiceImpl;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.Result;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
 import io.swagger.annotations.Api;
@@ -15,7 +16,15 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
+
+/**
+ * @author MaYunHao
+ * @version 1.0
+ * @description
+ * @date 2019/12/19 16:51
+ */
 
 @RestController
 @RequestMapping(path = "/index",produces = {"application/json"})
@@ -24,60 +33,82 @@ public class IndexController {
     @Autowired
     private ItemService itemService;
 
+    @ApiOperation("默认排名")
+    @GetMapping("")
+    public Result index( ){
+        List<BaseItem> items = itemService.getAll();
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("item",items);
+        return  Result.success(map);
+    }
+
+
     @ApiOperation("通过类型获取展品")
     @GetMapping("/getItemsByType")
-    public String getItemsByType(@RequestParam @ApiParam(name = "id",value = "类型id",required = true) Integer id,
-                                  HttpSession session){
+    public Result getItemsByType(@RequestParam @ApiParam(name = "id",value = "类型id",required = true) Integer id){
         List<BaseItem> items = itemService.getItemsByType(id);
-        return JSONObject.toJSONString(items);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("item",items);
+        return Result.success(map);
     }
+
 
     @ApiOperation("通过年代获取展品")
     @GetMapping("/getItemsByEra")
-    public String getItemsByEra(@RequestParam @ApiParam(name = "id",value = "年代id",required = true) Integer id,
-                                 HttpSession session){
+    public Result getItemsByEra(@RequestParam @ApiParam(name = "id",value = "年代id",required = true) Integer id){
         List<BaseItem> items = itemService.getItemsByEra(id);
-        return JSONObject.toJSONString(items);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("item",items);
+        return Result.success(map);
     }
+
+
+    @ApiOperation("通过名称获取展品")
     @GetMapping("/searchByName")
-    public String SearchByName(@RequestParam @ApiParam(name="itemName",value ="展品名称",required = true) String itemName,
-                                HttpSession session){
+    public Result SearchByName(@RequestParam @ApiParam(name="itemName",value ="展品名称",required = true) String itemName){
         List<BaseItem> items = itemService.searchByName(itemName);
-        return JSONObject.toJSONString(items);
-
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("item",items);
+        return Result.success(map);
     }
 
-    @ApiOperation("默认排名")
-    @GetMapping("")
-    public String index( HttpSession session){
-        List<BaseItem> items = itemService.getAll();
-        return  JSONObject.toJSONString(items);
-    }
 
     @ApiOperation("通过收藏量的多少")
     @GetMapping("/getItemsByCollection")
-    public String getItemsByCollection( HttpSession session){
+    public Result getItemsByCollection(){
         List<BaseItem> items = itemService.getItemsByCollection();
-        return JSONObject.toJSONString(items);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("item",items);
+        return Result.success(map);
     }
+
 
     @ApiOperation("通过点击量的多少")
     @GetMapping("/getItemsByClick")
-    public String getItemsByClick( HttpSession session){
+    public Result getItemsByClick(){
         List<BaseItem> items = itemService.getItemsByClick();
-        return JSONObject.toJSONString(items);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("item",items);
+        return Result.success(map);
     }
+
+
     @ApiOperation("通过评论数的多少")
     @GetMapping("/getItemsByComment")
-    public String getItemsByComment( HttpSession session){
+    public Result getItemsByComment(){
         List<BaseItem> items = itemService.getItemsByComment();
-        return JSONObject.toJSONString(items);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("item",items);
+        return Result.success(map);
     }
+
 
     @ApiOperation("获取展品的详情")
     @GetMapping("/getItemById/{id}")
-    public Item getItemById(@PathVariable(required = true) Integer id){
+    public Result getItemById(@PathVariable(required = true) Integer id){
         Item item = itemService.getItemById(id);
-        return item;
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("item",item);
+        return Result.success(map);
     }
 }

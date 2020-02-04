@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -28,10 +29,17 @@ public class ItemServiceImpl implements ItemService {
     @Autowired
     private ItemDao itemDao;
 
-    @Value("${myproperties.basephotourl}")
-    private String photobase;
+    /**
+     * 存储 视频或文件的默认地址
+     */
+    @Value("${myproperties.file-save-location}")
+    private String saveLocation;
 
-    private String baseUrl = "http://itrove.cn/images/";
+    /**
+     * 访问 视频或文件的默认地址
+     */
+    @Value("${myproperties.file-visit-url}")
+    private String baseUrl ;
 
     @Override
     public List<BaseItem> searchByName(String itemName) {
@@ -82,47 +90,57 @@ public class ItemServiceImpl implements ItemService {
                          String era,
                          MultipartFile video,
                          MultipartFile[] photo) throws Exception {
+        Integer eraId = itemDao.getEraId(era);
+        if(eraId == null) {
+            throw new Exception("朝代存在");
+
+        }
+
         //分别通过名称将对应id获取出来
         Integer typeId = itemDao.getTypeId(typename);
         if (typeId == null){
            typeId = itemDao.saveType(typename);
         }
-        Integer eraId = itemDao.getEraId(era);
-        if(eraId == null) throw new Exception("朝代存在");
 
-        //获取插入展品的id,后续插入图片
-        Integer id =  itemDao.saveItem(itemname,intro,typeId,eraId);
 
-        //先尝试一张是否可以报错
-        String photourl = saveFile(id, photo[0]);
-        String videourl = saveFile(id, video);
-        //将图片地址插回
-        if(photourl != null)
-             itemDao.updatePhoto(id,photourl);
-        if(photourl != null)
-            itemDao.updateVideo(id,video);
+
+        Item item = new Item();
+        item.setType(typename);
+        item.setEra(era);
+        item.setIntro(intro);
+        item.setName(itemname);
+        itemDao.saveItem(item);
+        updatePhoto(item.getId(),photo);
+
+        //保存视频
+        String videourl = saveFile(video);
+        if (videourl!=null){
+            itemDao.updateVideo(item.getId(),videourl);
+        }
     }
 
     /**
      * 保存文件
-     * @param itemid   展品的id，关联展品的id
      * @param file 文件
      * @return   访问的地址
      */
-    private String saveFile(Integer itemid ,MultipartFile file) throws IOException{
-        if (file == null) return  null;
-        System.out.println(photobase);
+    private String saveFile(MultipartFile file) throws IOException{
+        if (file == null) {
+            return null;
+        }
+        //获取文件类型
         String name = file.getContentType();
         String[] split = name.split("/");
-        //拼接图片的地址
-        System.out.println(file.getResource().getFilename());
-        String fileurl = photobase +itemid+"."+split[split.length - 1];
-        String getUrl = baseUrl+itemid+"."+split[split.length - 1];
+        String filetype = split[split.length - 1];
+        UUID uuid = UUID.randomUUID();
+        String fileurl = saveLocation +uuid+"."+filetype;
+        String getUrl = baseUrl+uuid+"."+filetype;
         File file1 = new File(fileurl);
         file1.createNewFile();
         file.transferTo(file1);
         return getUrl;
     }
+
     @Override
     public List<BaseItem> getAll() {
         return itemDao.getAll();
@@ -141,5 +159,17 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item getItemById(Integer id) {
         return itemDao.getItemById(id);
+    }
+
+    @Override
+    public void updatePhoto(Integer itemid, MultipartFile[] photos) throws IOException{
+        if (photos == null){
+            return;
+        }
+        int length = photos.length;
+        for (int i = 0; i <length ; i++) {
+            String geturl = saveFile(photos[i]);
+            itemDao.updatePhoto(itemid,geturl);
+        }
     }
 }

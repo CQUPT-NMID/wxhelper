@@ -15,10 +15,9 @@ public interface UserDao {
     User login(String id);
 
     @Insert("INSERT INTO `wxhelper`.`user` (`id`, `avater`, `nickname`, `gender`, `city`, `province`, `country`) VALUES (#{id}, #{avater}, #{nickname}, #{gender}, #{city}, #{province}, #{country});")
-    User saveUser(User user);
+    void saveUser(User user);
 
     @Select("select * from user where id = #{id} order by `time`")
-   // @ResultMap("baseItemMap")
     List<BaseItem> getHistoryByUserId(String id);
 
     @Update("update history set islike = #{isLike} where item_id = #{item_id}")

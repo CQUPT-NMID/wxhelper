@@ -24,21 +24,29 @@ public class WxLoginUtil {
     public static Map<String, Object> getWxUserOpenid(String code) {
         //拼接url
         StringBuilder url = new StringBuilder("https://api.weixin.qq.com/sns/jscode2session?");
-        url.append("appid=");//appid设置
+        //appid设置
+        url.append("appid=");
         url.append(APPID);
-        url.append("&secret=");//secret设置
+        //secret设置
+        url.append("&secret=");
         url.append(APPSecret);
-        url.append("&js_code=");//code设置
+        //code设置
+        url.append("&js_code=");
         url.append(code);
         url.append("&grant_type=authorization_code");
         Map<String, Object> map = null;
         try {
-            HttpClient client = HttpClientBuilder.create().build();//构建一个Client
-            HttpGet get = new HttpGet(url.toString()); //构建一个GET请求
-            HttpResponse response = client.execute(get);//提交GET请求
-            HttpEntity result = response.getEntity();//拿到返回的HttpResponse的"实体"
+            //构建一个Client
+            HttpClient client = HttpClientBuilder.create().build();
+            //构建一个GET请求
+            HttpGet get = new HttpGet(url.toString());
+            //提交GET请求
+            HttpResponse response = client.execute(get);
+            //拿到返回的HttpResponse的"实体"
+            HttpEntity result = response.getEntity();
             String content = EntityUtils.toString(result);
-            System.out.println(content);//打印返回的信息
+            //打印返回的信息
+            System.out.println(content);
             map = JSON.parseObject(content);
         } catch (Exception e) {
             e.printStackTrace();

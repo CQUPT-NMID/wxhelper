@@ -8,13 +8,22 @@ package cn.edu.cqupt.nmid.wxhelper.wxhelper.po;
  */
 
 public class Item extends BaseItem{
-
+    /**
+     * 展品的地图
+     */
+    private String imap;
     private String era;
     private String intro;
     private String video;
     private String type;
 
 
+    public String getImap() {
+        return imap;
+    }
+    public void setImap(String imap) {
+        this.imap = imap;
+    }
     public String getEra() {
         return era;
     }

@@ -36,4 +36,6 @@ public interface ItemService {
     void saveHistroy(Integer item_id, String user_id, Date date);
 
     Item getItemById(Integer id);
+
+    void updatePhoto(Integer itemid, MultipartFile[] photos) throws IOException;
 }
