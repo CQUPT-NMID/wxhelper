@@ -24,8 +24,9 @@ public enum Status {
     //用户未登录
     USER_NOT_LOGIN_IN(2001,"用户未登录"),
     //用户名或密码错误
-    USER_LOGIN_FLASE(2002,"用户名或密码错误");
-    //不可添加重复数据
+    USER_LOGIN_FLASE(2002,"用户名或密码错误"),
+    //过期
+    EXCEED(1002,"已过期");
 
 
     private String message;

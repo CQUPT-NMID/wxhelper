@@ -1,4 +1,4 @@
-package cn.edu.cqupt.nmid.wxhelper.wxhelper;
+package cn.edu.cqupt.nmid.wxhelper.wxhelper.exception;
 
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.enums.Status;
 

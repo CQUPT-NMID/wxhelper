@@ -66,6 +66,15 @@ public class Result implements Serializable {
         return result;
     }
 
+    public static Result success(Object data){
+        Result result = new Result();
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("data",data);
+        result.setResultCode(Status.SUCCESS);
+        result.setData(map);
+        return result;
+    }
+
     public static Result failure(Status status){
         Result result = new Result();
         result.setResultCode(status);
@@ -78,5 +87,15 @@ public class Result implements Serializable {
         result.setData(data);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Result{" +
+                "code=" + code +
+                ", message='" + message + '\'' +
+                ", data=" + data +
+                '}';
+    }
+
 
 }

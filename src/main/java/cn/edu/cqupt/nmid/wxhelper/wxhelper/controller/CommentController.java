@@ -56,8 +56,10 @@ public class CommentController {
     public Result publishComment(@RequestParam @ApiParam(value = "展品id ",required = true) Integer itemid,
                                  @RequestParam @ApiParam(value = "评论内容",required = true) String content){
         try{
-            String userId = getUserId();
-            commentService.publishComment(itemid,content,userId);
+            ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpServletRequest request = sra.getRequest();
+            String userid = (String) request.getAttribute("userid");
+            commentService.publishComment(itemid,content,userid);
             return Result.success();
         }catch (Exception e){
             logger.error(e.getMessage());
@@ -93,7 +95,7 @@ public class CommentController {
      */
     @ApiOperation("通过评论id删除评论")
     @GetMapping("/deleteCommentByCommentId")
-    public Result deleteCommentByCommentId(@RequestParam Integer commentid){
+    public Result deleteCommentByCommentId(@RequestParam @ApiParam(value = "评论id",required = true) Integer commentid){
         try{
             commentService.deleteCommentByCommentId(commentid);
             return Result.success();

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.cqupt.nmid.wxhelper.wxhelper.dao.StatisticDao">
+
+    <update id="updateLikeNum">
+        update item set
+        <if test="isAdd != null and isAdd == 1">
+            likenum = ifnull(likenum,0) + #{num}
+        </if>
+        <if test="isAdd == null || isAdd == 0">
+            likenum = ifnull(likenum,0) - #{num}
+        </if>
+        where id = #{itemid}
+    </update>
+
+    <update id="updateCollectNum">
+        update item set
+        <if test="isAdd != null and isAdd == 1">
+            collectnum = ifnull(collectnum,0) + #{num}
+        </if>
+        <if test="isAdd == null || isAdd == 0">
+            collectnum = ifnull(collectnum,0) - #{num}
+        </if>
+        where id = #{itemid}
+    </update>
+
+    <update id="updateCommentNum">
+        update item set
+        <if test="isAdd != null and isAdd == 1">
+            commentnum = ifnull(commentnum,0) + #{num}
+        </if>
+        <if test="isAdd == null || isAdd == 0">
+            commentnum = ifnull(commentnum,0) - #{num}
+        </if>
+        where id = #{itemid}
+    </update>
+
+</mapper>

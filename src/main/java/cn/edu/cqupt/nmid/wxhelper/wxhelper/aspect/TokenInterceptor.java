@@ -1,8 +1,12 @@
 package cn.edu.cqupt.nmid.wxhelper.wxhelper.aspect;
 
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.config.JwtConfig;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.enums.Status;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.exception.ResponseUtils;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.Role;
 import io.jsonwebtoken.Claims;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -11,6 +15,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.SignatureException;
+import java.util.HashMap;
 
 /**
  * @author MaYunHao
@@ -21,6 +26,8 @@ import java.security.SignatureException;
 
 @Component
 public class TokenInterceptor extends HandlerInterceptorAdapter {
+
+    private final Logger logger = LoggerFactory.getLogger(TokenInterceptor.class);
 
     @Resource
     private JwtConfig jwtConfig;
@@ -57,13 +64,20 @@ public class TokenInterceptor extends HandlerInterceptorAdapter {
         //管理端登陆
         if (uri.contains("/admin")){
             String role= (String) claims.get(JwtConfig.ROLE);
-            if(role != Role.ADMIN){
+            //无权限
+            if(!role.equals(Role.ADMIN)){
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("code", Status.Unauthorized.getCode());
+                map.put("message",Status.Unauthorized.getMessage());
+                System.out.println(role);
+                logger.info("权限异常 {}",map);
+                ResponseUtils.out(response,map);
                 return false;
             }
         }
 
         /** 设置 userid 用户身份ID */
-        request.setAttribute("userid", claims.getSubject());
+        request.setAttribute("userid", claims.get("userid"));
         return true;
     }
 

@@ -4,6 +4,7 @@ import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.BaseItem;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Era;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Item;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Type;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.query.ItemQuery;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.ResultType;
@@ -74,7 +75,7 @@ public interface ItemDao {
     Integer getTypeId(String typename);
 
 
-    Integer saveType(String typename);
+    Integer saveType(Type type);
 
     /**
      * 通过年代名称获取年代id
@@ -116,4 +117,32 @@ public interface ItemDao {
     void updateType(Type type);
 
     List<Type> getAllType();
+
+    List<BaseItem> index(ItemQuery itemQuery);
+
+    /**
+     * 通过展品id获取展品图片
+     */
+    List<String> getPhotoByItemId(Integer itemid);
+
+    /**
+     * 通过用户id 获取历史记录
+     * @param id
+     * @return
+     */
+    List<BaseItem> getHistoryByUserId(String id,String sign);
+
+    /**
+     * 查询全面的信息
+     * @param itemQuery
+     * @return
+     */
+    List<Item> indexAdmin(ItemQuery itemQuery);
+
+    /**
+     *  删除图片
+     * @param id 图片的id
+     * @return
+     */
+    int deletePhoto(Integer id);
 }

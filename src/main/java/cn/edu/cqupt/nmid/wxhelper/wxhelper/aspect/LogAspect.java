@@ -16,12 +16,16 @@ import java.util.Arrays;
 public class LogAspect {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    //定义切面,controller下的所有方法
+    /**
+     * 定义切面,controller下的所有方法
+     */
     @Pointcut("execution(* cn.edu.cqupt.nmid.wxhelper.wxhelper.controller.*.*(..))")
     public void log() {
     }
+    @Pointcut("execution(* cn.edu.cqupt.nmid.wxhelper.wxhelper.controller.admin.*.*(..)))")
+    public void logAdmin(){}
 
-    @Before("log()")
+    @Before("log() || logAdmin()")
     public void doBefore(JoinPoint joinPoint) {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = servletRequestAttributes.getRequest();
@@ -30,20 +34,21 @@ public class LogAspect {
         String classMethod = joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
         RequestLog requestLog = new RequestLog(url, ip, classMethod, args);
-        logger.info("requset: {}", requestLog);
+        logger.info("request: {}", requestLog);
     }
 
-    @AfterReturning(pointcut = "log()", returning = "result")
+    @AfterReturning(pointcut = "log() || logAdmin()", returning = "result")
     public void doAfterReturn(Object result) {
         logger.info("result : {}", result);
     }
 
-    @After("log()")
+    @After("log() || logAdmin()")
     public void doAfter() {
 
     }
     //消息格式
     private class RequestLog {
+
         private String url;
         private String ip;
         private String classMethod;
@@ -65,5 +70,6 @@ public class LogAspect {
                     ", args=" + Arrays.toString(args) +
                     '}';
         }
+
     }
 }

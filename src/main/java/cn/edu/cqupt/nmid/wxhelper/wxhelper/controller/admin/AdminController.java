@@ -1,30 +1,28 @@
 package cn.edu.cqupt.nmid.wxhelper.wxhelper.controller.admin;
 
-import cn.edu.cqupt.nmid.wxhelper.wxhelper.MyException;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.exception.MyException;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.config.JwtConfig;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.enums.Status;
-import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Admin;
-import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Era;
-import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Item;
-import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Type;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.*;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.query.ItemQuery;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.service.AdminService;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.service.ItemService;
-import cn.edu.cqupt.nmid.wxhelper.wxhelper.service.impl.AdminServiceImpl;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.Result;
 
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.Role;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.page.PageRequest;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.page.PageResult;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import net.sf.jsqlparser.statement.execute.Execute;
-import org.apache.ibatis.io.ResolverUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.print.DocFlavor;
 import java.util.HashMap;
 import java.util.List;
 
@@ -83,8 +81,8 @@ public class AdminController {
                            @RequestParam @ApiParam(value = "展品介绍",required = true) String intro,
                            @RequestParam @ApiParam(value = "展品类型名",required = true) String typename ,
                            @RequestParam @ApiParam(value = "展品年代",required = true) String era,
-                           @RequestParam(required = false) @ApiParam(value = "展品图片url",required = false) List<String> photos,
-                           @ApiParam(value = "展品视频",required = false) String video  ){
+                           @RequestParam(required = false) @ApiParam(value = "展品图片url",required = false,type = "array") List<String> photos,
+                           @RequestParam(required = false) @ApiParam(value = "展品视频",required = false,type = "string") String video  ){
         try {
             Integer id = itemService.saveItem(itemname,intro,typename,era,video,photos);
             HashMap<String, Object> map = new HashMap<>();
@@ -135,13 +133,39 @@ public class AdminController {
         }
     }
 
+    /**
+     *
+     * 查询展品
+     * @param itemQuery 查询类
+     * @return
+     */
+    @ApiOperation("管理员展品查询")
+    @PostMapping("/index")
+    public Result index(@RequestBody(required = false)@ApiParam(value = "查询信息", type = "PageRequest", required = false)ItemQuery itemQuery) {
+        if (itemQuery == null){
+            itemQuery = new ItemQuery();
+        }
+        PageRequest pageRequest = itemQuery.getPageRequest();
+        PageHelper.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        List<Item> items = itemService.indexAdmin(itemQuery);
+        PageInfo pageInfo = new PageInfo<>(items);
+        PageResult pageResult = new PageResult(pageInfo);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("item", pageResult);
+        return Result.success(map);
+    }
+
 //        ------------------------------------ 年代相关------------------------------------
 
-    @ApiOperation("添加年代")
-    @PostMapping("/inputEra")
-    public Result inputEra(@RequestBody @ApiParam(required = true) Era era){
-        itemService.saveEra(era);
-        return Result.success();
+
+    @ApiOperation("添加或修改年代")
+    @PostMapping("/updateEra")
+    public Result updateEra(@RequestBody @ApiParam(required = true,value = "年代") Era era){
+        itemService.updateEra(era);
+        Integer id = itemService.saveEra(era);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("id",id);
+        return Result.success(map);
     }
 
     @ApiOperation("删除年代")
@@ -157,25 +181,15 @@ public class AdminController {
         }
     }
 
-    @ApiOperation("修改年代")
-    @PostMapping("/updateEra")
-    public Result updateEra(@RequestBody @ApiParam(required = true,value = "带有id的era") Era era){
-        itemService.updateEra(era);
-        return Result.success();
-    }
 
-    @ApiOperation("查询所有年代")
-    @PostMapping("/getAllEra")
-    public Result getAllEra(){
-        itemService.getAllEra();
-        return Result.success();
-    }
+
+
 //        ------------------------------------ 类型相关------------------------------------
 
-    @ApiOperation("添加类别")
-    @PostMapping("/saveType")
-    public Result saveType(@RequestBody @ApiParam(required = true) String itemname){
-        itemService.saveTpye(itemname);
+    @ApiOperation("添加或修改类别")
+    @PostMapping("/updateType")
+    public Result updateType(@RequestBody @ApiParam(required = true) Type type){
+        itemService.updateType(type);
         return Result.success();
     }
 
@@ -195,35 +209,23 @@ public class AdminController {
         }
     }
 
-    @ApiOperation("修改类型")
-    @PostMapping("/updateType")
-    public Result updateType(@RequestBody @ApiParam(required = true,value = "带有id的era") Type type){
-        itemService.updateType(type);
-        return Result.success();
-    }
-
-    @ApiOperation("查询所有类型")
-    @PostMapping("/getAllType")
-    public Result getAllType(){
-        List<Type> types = itemService.getAllType();
-        return Result.success();
-    }
-
 
     /**
-     * 为展品添加图片
+     * 为展品添加图片同时保存文件
      * @param itemid 展品id
      * @param photos 图片
      * @return
      */
-    @ApiOperation("为展品添加图片")
-    @PostMapping("/updatePhoto")
+    @ApiOperation("为展品添加图片同时保存图片文件")
+    @PostMapping("/updatePhotoWithFiles")
     @ResponseBody
-    public Result updatePhoto(@RequestParam @ApiParam(value = "展品id",required = true) Integer itemid,
-                              @RequestParam @ApiParam(value = "图片",required = true) MultipartFile[] photos){
+    public Result updatePhotoWithFiles(@RequestParam @ApiParam(value = "展品id",required = true) Integer itemid,
+                              @RequestParam @ApiParam(value = "图片文件",required = true) MultipartFile[] photos){
         try{
-            itemService.updatePhoto(itemid,photos);
-            return Result.success();
+            List<String> urls = itemService.updatePhotoWithFile(itemid, photos);
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("urls",urls);
+            return Result.success(map);
         }catch (Exception e){
             logger.error("addPhoto have error",e.getMessage());
             return Result.failure(Status.FAISE);
@@ -231,17 +233,47 @@ public class AdminController {
     }
 
     /**
-     * 上传图片
-     * @param photos 图片
+     * 为展品添加图片 （图片地址）
+     * @param itemid 展品id
+     * @param urls 图片访问地址
      * @return
      */
-    @ApiOperation("上传图片")
-    @PostMapping("/uploadPhoto")
+    @ApiOperation("为展品添加图片（url）")
+    @PostMapping("/updatePhotoWithUrls")
     @ResponseBody
-    public Result uploadPhoto(@RequestParam @ApiParam(value = "图片",required = true) MultipartFile[] photos){
+    public Result updatePhotoWithUrls(@RequestParam @ApiParam(value = "展品id",required = true) Integer itemid,
+                                       @RequestParam @ApiParam(value = "图片访问地址",required = true) List<String> urls){
         try{
-           List<String> urls = itemService.uploadPhoto(photos);
+            itemService.updatePhotoWithUrls(itemid,urls);
             return Result.success();
+        }catch (Exception e){
+            logger.error("addPhoto have error",e.getMessage());
+            return Result.failure(Status.FAISE);
+        }
+    }
+
+    @ApiOperation("删除展品的图片")
+    @DeleteMapping("/photo/{id}")
+    @ResponseBody
+    public Result deletePhoto(@PathVariable @ApiParam(value = "图片id") Integer id){
+        itemService.deletePhoto(id);
+        return Result.success();
+    }
+
+    /**
+     * 上传图片
+     * @param files 图片
+     * @return
+     */
+    @ApiOperation("上传文件")
+    @PostMapping("/uploadFile")
+    @ResponseBody
+    public Result uploadFile(@RequestParam @ApiParam(value = "文件",required = true) MultipartFile[] files){
+        try{
+           List<String> urls = itemService.uploadFile(files);
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("urls",urls);
+            return Result.success(map);
         }catch (Exception e){
             logger.error("addPhoto have error",e.getMessage());
             return Result.failure(Status.FAISE);
@@ -256,13 +288,13 @@ public class AdminController {
      * @param video  视频
      * @return
      */
-    @PostMapping("/updateVideo")
+    @PostMapping("/updateVideoWithFile")
     @ResponseBody
-    @ApiOperation("更新视频")
-    public Result updateVideo(@RequestParam @ApiParam(value = "展品id",required = true) Integer itemid,
-                              @RequestParam @ApiParam(value = "视频",required = true) MultipartFile video){
+    @ApiOperation("更新视频，同时上传视频文件")
+    public Result updateVideoWithFile(@RequestParam @ApiParam(value = "展品id",required = true) Integer itemid,
+                              @RequestParam @ApiParam(value = "视频文件",required = true) MultipartFile video){
         try{
-            itemService.updateVedio(itemid,video);
+            itemService.updateVedioWithFile(itemid,video);
             return Result.success();
         }catch (Exception e){
             logger.error("addPhoto have error",e.getMessage());
@@ -270,7 +302,25 @@ public class AdminController {
         }
     }
 
-
+    /**
+     * 更新视频
+     * @param itemid  展品id
+     * @param url  视频地址
+     * @return
+     */
+    @PostMapping("/updateVideoWithUrl")
+    @ResponseBody
+    @ApiOperation("更新视频(url)")
+    public Result updateVideoWithUrl(@RequestParam @ApiParam(value = "展品id",required = true) Integer itemid,
+                                      @RequestParam @ApiParam(value = "视频访问地址",required = true) String url){
+        try{
+            itemService.updateVedioWithUrl(itemid,url);
+            return Result.success();
+        }catch (Exception e){
+            logger.error("addPhoto have error",e.getMessage());
+            return Result.failure(Status.SysError);
+        }
+    }
 
 
     /**

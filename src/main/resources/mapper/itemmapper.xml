@@ -5,16 +5,55 @@
 <mapper namespace="cn.edu.cqupt.nmid.wxhelper.wxhelper.dao.ItemDao">
 
 <!--    基础查询-->
-        <sql id="baseSet">SELECT id,imap,purl,`itemname`,likenum,collectnum,commentnum FROM itemview</sql>
-<!--    展品-->
+        <sql id="baseSet">SELECT id,imap,`itemname`,likenum,collectnum,commentnum FROM itemview</sql>
+        <sql id="adminSet">SELECT id,imap,era_name,intro,video,itemname,type_name  FROM itemview</sql>
+
+    <!--    展品-->
     <select id="getAll" resultMap="baseItemMap">
         <include refid="baseSet"></include>
     </select>
 
 <!--展品的条件查询-->
+    <select id="indexAdmin" parameterType="ItemQuery" resultMap="itemMap">
+        <include refid="adminSet"></include>
+        <where>
+        <if test="itemname != null and itemname != ''">
+            itemname like #{itemname}
+        </if>
+        <if test="typename != null and typename != ''">
+            AND type_name like #{typename}
+        </if>
+        <if test="eraname != null and eraname != ''">
+            AND era_name like #{eraname}
+        </if>
+        </where>
+        <if test="rankBy !=null and rankBy.msg != null">
+            order by #{rankBy.msg} desc
+        </if>
+    </select>
+
+    <!--展品的条件查询-->
+    <select id="index" parameterType="ItemQuery" resultMap="baseItemMap">
+        <include refid="baseSet"></include>
+        <where>
+            <if test="itemname != null">
+                itemname like #{itemname}
+            </if>
+            <if test="typename != null">
+                AND type_name like #{typename}
+            </if>
+            <if test="eraname != null">
+                AND era_name like #{eraname}
+            </if>
+        </where>
+        <if test="rankBy !=null and rankBy.msg != null">
+            order by #{rankBy.msg} desc
+        </if>
+    </select>
+
     <select id="searchByName" resultMap="baseItemMap" parameterType="java.lang.String">
         <include refid="baseSet"></include>
-        where itemname like #{value };
+        where itemname like CONCAT(CONCAT('%', #{itemname}), '%');
   </select>
     <select id="getItemsByType" resultMap="baseItemMap" parameterType="java.lang.Integer">
         <include refid="baseSet"></include>
@@ -26,17 +65,17 @@
   </select>
     <select id="getItemsByCollection" resultMap="baseItemMap">
         <include refid="baseSet"></include>
-         order by collectnum;
+         order by collectnum desc ;
   </select>
     <select id="getItemsByComment" resultMap="baseItemMap">
         <include refid="baseSet"></include>
-        order by commentnum;
+        order by commentnum desc;
   </select>
     <select id="getItemsByClick" resultMap="baseItemMap" >
-        <include refid="baseSet"></include> order by likenum;
+        <include refid="baseSet"></include> order by likenum desc;
   </select>
     <select id="getItemById" parameterType="java.lang.Integer" resultMap="itemMap">
-            SELECT id,imap,purl,era_name,intro,video,itemname,type_name ,likenum,collectnum,commentnum from itemview where id= #{id};
+            SELECT id,imap,era_name,intro,video,itemname,type_name ,likenum,collectnum,commentnum from itemview where id= #{id};
     </select>
 
     <!--    类型-->
@@ -50,10 +89,10 @@
     <select id="getEraId" parameterType="java.lang.String" resultType="java.lang.Integer">
         select id from `era` where `era`.eraname = #{era};
     </select>
-    <select id="getAllEra">
+    <select id="getAllEra" resultType="Era">
         select * from  era;
     </select>
-    <select id="getAllType">
+    <select id="getAllType" resultType="Type">
          select * from  `type`;
     </select>
     <update id="updateVideo">
@@ -65,13 +104,13 @@
     <insert id="updatePhoto">
         insert photo(item_id,url) values (#{itemid},#{photo})
     </insert>
-    <insert id="saveType" parameterType="java.lang.String" >
+    <insert id="saveType" parameterType="Type" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         <selectKey keyColumn="id" keyProperty="id" resultType="int">
             select last_insert_id();
         </selectKey>
         INSERT type (typename) values (#{typename});
     </insert>
-    <insert id="saveEra" parameterType="Era">
+    <insert id="saveEra" parameterType="Era" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
         insert into era(eraname,begintime,endtime) values (#{eraname},#{begintime},#{endtime})
     </insert>
     <insert id="saveHistory">
@@ -100,30 +139,61 @@
     <delete id="deleteTypeByName" parameterType="java.lang.String">
         delete from `type` where typename = #{name};
     </delete>
+    <select id="getPhotoByItemId" parameterType="java.lang.Integer" resultType="cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Photo">
+        select url ,id from photo where item_id = #{itemid};
+    </select>
     <resultMap id="itemMap" type="Item">
         <id column="id" property="id" javaType="java.lang.Integer"></id>
-        <result column="eraname" property="era" javaType="java.lang.String"></result>
+        <result column="era_name" property="era" javaType="java.lang.String"></result>
         <result column="intro" property="intro"></result>
         <result column="video" property="video"></result>
         <result column="itemname" property="name"></result>
-        <result column="typename" property="type" javaType="java.lang.String"></result>
+        <result column="type_name" property="type" javaType="java.lang.String"></result>
         <result column="collectnum" property="collectnum"></result>
         <result column="commentnum" property="commentnum"></result>
         <result column="likenum" property="likenum"></result>
         <result column="imap" property="imap"></result>
-        <collection property="photos" javaType="ArrayList" ofType="string" >
-            <result property="photos" column="purl"></result>
+        <collection property="photos" javaType="ArrayList" ofType="cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Photo" select="getPhotoByItemId" column="id">
+            <result property="id" column="id"></result>
+            <result property="url" column="url"></result>
         </collection>
     </resultMap>
+
+    <select id="getAllFullInfo" resultMap="itemMap">
+        select id,imap,era_name,intro,video,itemname,type_name ,likenum,collectnum,commentnum from itemview;
+    </select>
+
     <resultMap id="baseItemMap" type="BaseItem">
         <id column="id" property="id" javaType="java.lang.Integer"></id>
         <result column="itemname" property="name"></result>
         <result column="collectnum" property="collectnum"></result>
         <result column="commentnum" property="commentnum"></result>
         <result column="likenum" property="likenum"></result>
-        <collection property="photos" javaType="ArrayList" ofType="string" >
-            <result property="photos" column="purl"></result>
+        <collection property="photos" javaType="ArrayList" ofType="cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Photo" select="getPhotoByItemId" column="id">
+            <result property="url" column="url"></result>
+            <result property="id" column="id"></result>
+
         </collection>
     </resultMap>
+
+    <select id="getHistoryByUserId" resultMap="baseItemMap" parameterType="java.lang.String">
+        <include refid="baseSet"></include>
+         where id in
+        (select item_id from history where user_id = #{id}
+        <if test="sign != null and sign == 1">
+            and `like` = 1
+        </if>
+        <if test="sign != null and sign == 2">
+            and comment = 1
+        </if>
+        <if test="sign != null and sign == 3">
+            and collect = 1
+        </if>
+        ORDER BY `time` desc)
+    </select>
+
+    <delete id="deletePhoto" >
+        delete from photo where id = #{id};
+    </delete>
 
 </mapper>

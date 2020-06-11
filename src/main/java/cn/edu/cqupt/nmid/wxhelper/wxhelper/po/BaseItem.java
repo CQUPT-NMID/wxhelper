@@ -11,9 +11,9 @@ import java.util.List;
  */
 
 public class BaseItem {
-    private Integer id;
 
-    private List<String> photos;
+    private Integer id;
+    private List<Photo> photos;
     private String name;
     private Integer collectnum;
     private Integer likenum;
@@ -60,11 +60,11 @@ public class BaseItem {
         this.commentnum = commentnum;
     }
 
-    public List<String> getPhotos() {
+    public List<Photo> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(List<String> photos) {
+    public void setPhotos(List<Photo> photos) {
         this.photos = photos;
     }
 

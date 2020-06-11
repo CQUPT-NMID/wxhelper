@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://120.24.93.68:3306/wxhelper?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/wxhelper?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
     username: root
     password: 123456
     type: com.alibaba.druid.pool.DruidDataSource
@@ -28,10 +28,11 @@ spring:
       enabled: true
   servlet:
     multipart:
-      max-file-size: 10MB
+      max-file-size: 100MB
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: cn.edu.cqupt.nmid.wxhelper.wxhelper.po
+  config-location: classpath:mybatis-config.xml
 server:
   tomcat:
     accesslog:
@@ -45,30 +46,38 @@ config:
     expire: 3600
     #header 名称
     header: token
+  cos:
+    secretId: AKIDvjNo45SHVYNyMaqIqFSRDm9HDxTocHjy
+    secretKey:
+    regin: ap-chengdu
+    url: https://wxhelper-1300698904.cos.ap-chengdu.myqcloud.com/
+    bucketName: wxhelper-1300698904
 
 #文件存储及访问
 myproperties:
   file-save-location: /usr/local/src/wxhelper/images/
   file-visit-url: https://wxhelper.itrover.cn/wxhelper/images/
+pagehelper:
+  reasonable: true
+
 ---
 spring:
   profiles: dev
 server:
-  port: 8080
+  port: 8081
 logging:
   level:
-   root: error
-   cn.edu.cqupt.nmid.wxhelper.wxhelper: error
+   root: info
+   cn.edu.cqupt.nmid.wxhelper.wxhelper: info
   file:
-    name: wxhelp-log/wxhelper-dev.log
+    name: wxhelper-log/wxhelper-dev.log
     clean-history-on-start: true
-debug: true
 
 ---
 spring:
   profiles: pro
 server:
-  port: 80
+  port: 8080
 logging:
   level:
     root: error

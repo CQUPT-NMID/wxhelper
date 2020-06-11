@@ -1,18 +1,19 @@
 package cn.edu.cqupt.nmid.wxhelper.wxhelper.service.impl;
 
 
-import cn.edu.cqupt.nmid.wxhelper.wxhelper.MyException;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.exception.MyException;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.dao.ItemDao;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.enums.Status;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.BaseItem;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Era;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Item;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Type;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.query.ItemQuery;
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.service.ItemService;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.CosUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     private ItemDao itemDao;
+
+    @Autowired
+    private CosUtil cosUtil;
 
     /**
      * 存储 视频或文件的默认地址
@@ -86,7 +90,7 @@ public class ItemServiceImpl implements ItemService {
         return itemDao.getEraId(era);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Integer saveItemAndFile(String itemname,
                          String intro,
@@ -102,7 +106,9 @@ public class ItemServiceImpl implements ItemService {
         //分别通过名称将对应id获取出来
         Integer typeId = itemDao.getTypeId(typename);
         if (typeId == null){
-           typeId = itemDao.saveType(typename);
+            Type type = new Type();
+            type.setTypename(typename);
+            typeId = itemDao.saveType(type);
         }
 
         Item item = new Item();
@@ -111,7 +117,7 @@ public class ItemServiceImpl implements ItemService {
         item.setIntro(intro);
         item.setName(itemname);
         itemDao.saveItem(item);
-        updatePhoto(item.getId(),photo);
+        updatePhotoWithFile(item.getId(),photo);
 
         //保存视频
         String videourl = saveFile(video);
@@ -121,10 +127,12 @@ public class ItemServiceImpl implements ItemService {
         return item.getId();
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Integer saveItem(String itemname, String intro, String typename, String era, String video, List<String> photos) {
+
         Integer eraId = itemDao.getEraId(era);
+
         if(eraId == null) {
             itemDao.saveEra(new Era(era,null,null));
         }
@@ -132,8 +140,11 @@ public class ItemServiceImpl implements ItemService {
         //分别通过名称将对应id获取出来
         Integer typeId = itemDao.getTypeId(typename);
         if (typeId == null){
-            typeId = itemDao.saveType(typename);
+            Type type = new Type();
+            type.setTypename(typename);
+            typeId = itemDao.saveType(type);
         }
+
         Item item = new Item();
         item.setType(typename);
         item.setEra(era);
@@ -169,9 +180,10 @@ public class ItemServiceImpl implements ItemService {
             return null;
         }
         //获取文件类型
-        String name = file.getContentType();
-        String[] split = name.split("/");
-        String filetype = split[split.length - 1];
+//        String name = file.getContentType();
+//        String[] split = name.split("/");
+//        String filetype = split[split.length - 1];
+        String filetype = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.'));
         UUID uuid = UUID.randomUUID();
         String fileurl = saveLocation +uuid+"."+filetype;
         String getUrl = baseUrl+uuid+"."+filetype;
@@ -202,15 +214,18 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void updatePhoto(Integer itemid, MultipartFile[] photos) throws IOException{
+    public List<String>  updatePhotoWithFile(Integer itemid, MultipartFile[] photos) throws IOException{
         if (photos == null){
-            return;
+            return null;
         }
+        ArrayList<String> urls = new ArrayList<>();
         int length = photos.length;
         for (int i = 0; i <length ; i++) {
             String geturl = saveFile(photos[i]);
             itemDao.updatePhoto(itemid,geturl);
+            urls.add(geturl);
         }
+        return urls;
     }
 
     @Override
@@ -225,7 +240,7 @@ public class ItemServiceImpl implements ItemService {
      * @throws IOException
      */
     @Override
-    public void updateVedio(Integer itemid, MultipartFile video) throws IOException {
+    public void updateVedioWithFile(Integer itemid, MultipartFile video) throws IOException {
         String geturl = saveFile(video);
         itemDao.updateVideo(itemid,geturl);
     }
@@ -241,8 +256,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void updateEra(Era era) {
+    public Integer updateEra(Era era) {
+        if(era.getId() == null){
+            return itemDao.saveEra(era);
+        }
         itemDao.updateEra(era);
+        return era.getId();
     }
 
     @Override
@@ -252,28 +271,29 @@ public class ItemServiceImpl implements ItemService {
 
 
     /**
-     * 仅仅是上传图片
-     * @param photos  图片
+     * 仅仅是上传文件
+     * @param files  文件
      * @return
      * @throws IOException
      */
     @Override
-    public List<String> uploadPhoto(MultipartFile[] photos) throws IOException {
+    public List<String> uploadFile(MultipartFile[] files) throws IOException {
         List<String> urls = new ArrayList<>();
-        if (photos == null || photos.length == 0){
+        if (files == null || files.length == 0){
             return null;
         }
-        int length = photos.length;
+        int length = files.length;
         for (int i = 0; i <length ; i++) {
-            String geturl = saveFile(photos[i]);
+            //上传到对象存储
+            String geturl = cosUtil.upload(files[i]);
             urls.add(geturl);
         }
         return urls;
     }
 
     @Override
-    public void saveTpye(String typename) {
-        itemDao.saveType(typename);
+    public Integer saveTpye(Type type) {
+        return itemDao.saveType(type);
     }
 
     @Override
@@ -288,12 +308,56 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void updateType(Type type) {
+    public Integer updateType(Type type) {
+        if (type.getId() == null){
+            itemDao.saveType(type);
+        }
         itemDao.updateType(type);
+        return type.getId();
     }
 
     @Override
     public List<Type> getAllType() {
         return itemDao.getAllType();
+    }
+
+
+    @Override
+    public List<BaseItem> index(ItemQuery itemQuery) {
+        if (itemQuery != null){
+            return itemDao.index(itemQuery);
+        }else{
+            return itemDao.getAll();
+        }
+
+    }
+
+    @Override
+    public List<BaseItem> getHistoryByUserId(String id,String sign) {
+        return itemDao.getHistoryByUserId(id,sign);
+    }
+
+    @Override
+    public List<Item> indexAdmin(ItemQuery itemQuery) {
+        return itemDao.indexAdmin(itemQuery);
+    }
+
+    @Override
+    public int deletePhoto(Integer id) {
+        return itemDao.deletePhoto(id);
+    }
+
+
+    @Override
+    public void updatePhotoWithUrls(Integer itemid, List<String> urls) {
+        int size = urls.size();
+        for (int i =0 ;i<size;i++) {
+            itemDao.updatePhoto(itemid,urls.get(i));
+        }
+    }
+
+    @Override
+    public void updateVedioWithUrl(Integer itemid, String url) throws IOException {
+        itemDao.updateVideo(itemid,url);
     }
 }

@@ -1,8 +1,10 @@
 package cn.edu.cqupt.nmid.wxhelper.wxhelper.config;
 
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.aspect.TokenInterceptor;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.converter.RankByEnumConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
@@ -43,7 +45,7 @@ public class WebConfig extends WebMvcConfigurationSupport {
 
     @Override
     protected void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(tokenInterceptor).addPathPatterns("/**")
+         registry.addInterceptor(tokenInterceptor).addPathPatterns("/**")
                 .excludePathPatterns("/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**");
     }
 
@@ -56,5 +58,8 @@ public class WebConfig extends WebMvcConfigurationSupport {
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
-
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addConverter(new RankByEnumConverter());
+    }
 }

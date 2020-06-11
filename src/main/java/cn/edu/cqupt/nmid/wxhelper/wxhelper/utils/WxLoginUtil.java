@@ -12,8 +12,8 @@ import java.util.*;
 
 public class WxLoginUtil {
 
-    public static final String APPID = "wx5339814510e6f070";
-    public static final String APPSecret = "93e7de563b43b3bd4d53b058c38547cb";
+    public static final String APPID = "wxcd5625a6f15d74b9";
+    public static final String APPSecret = "19b513001986dca3274c74b4dae7aa78";
 
     /**
      * 获取用户得到openid

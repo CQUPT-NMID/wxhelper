@@ -1,6 +1,8 @@
 package cn.edu.cqupt.nmid.wxhelper.wxhelper.service;
 
 import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Comment;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.po.vo.CommentVo;
+import cn.edu.cqupt.nmid.wxhelper.wxhelper.utils.page.PageRequest;
 
 import java.util.List;
 
@@ -19,4 +21,10 @@ public interface CommentService {
     List<Comment> getCommentByUserId(String userid);
 
     void deleteCommentByCommentId(Integer commentid);
+
+    /**
+     * 查询所有的评论
+     * @return
+     */
+    List<CommentVo> list();
 }

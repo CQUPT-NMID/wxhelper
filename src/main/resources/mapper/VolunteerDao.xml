@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.cqupt.nmid.wxhelper.wxhelper.dao.VolunteerDao">
+
+    <resultMap type="cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Volunteer" id="VolunteerMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="telephone" column="telephone" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="reply" column="reply" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="rid" column="rid" jdbcType="INTEGER"/>
+        <result property="publishTime" column="publish_time" jdbcType="TIMESTAMP"/>
+        <result property="userid" column="userid" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="VolunteerMap">
+        select
+          id, name, telephone, email, reply, status, rid, publish_time, userid
+        from wxhelper.volunteer
+        where id = #{id}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="VolunteerMap">
+        select
+          id, name, telephone, email, reply, status, rid, publish_time, userid
+        from wxhelper.volunteer
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="VolunteerMap">
+        select
+          id, name, telephone, email, reply, status, rid, publish_time, userid
+        from wxhelper.volunteer
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="telephone != null and telephone != ''">
+                and telephone = #{telephone}
+            </if>
+            <if test="email != null and email != ''">
+                and email = #{email}
+            </if>
+            <if test="reply != null and reply != ''">
+                and reply = #{reply}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="rid != null">
+                and rid = #{rid}
+            </if>
+            <if test="publishTime != null">
+                and publish_time = #{publishTime}
+            </if>
+            <if test="userid != null and userid != ''">
+                and userid = #{userid}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into wxhelper.volunteer(name, telephone, email, reply, status, rid, publish_time, userid)
+        values (#{name}, #{telephone}, #{email}, #{reply}, #{status}, #{rid}, #{publishTime}, #{userid})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update wxhelper.volunteer
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="telephone != null and telephone != ''">
+                telephone = #{telephone},
+            </if>
+            <if test="email != null and email != ''">
+                email = #{email},
+            </if>
+            <if test="reply != null and reply != ''">
+                reply = #{reply},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="rid != null">
+                rid = #{rid},
+            </if>
+            <if test="publishTime != null">
+                publish_time = #{publishTime},
+            </if>
+            <if test="userid != null and userid != ''">
+                userid = #{userid},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from wxhelper.volunteer where id = #{id}
+    </delete>
+
+    <insert id="publishVolunteerInfo" parameterType="cn.edu.cqupt.nmid.wxhelper.wxhelper.po.Volunteer" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into volunteer(name,telephone,email,publish_time,rid)
+        values(#{name},#{telephone},#{email},#{publishTime},#{rid})
+    </insert>
+
+    <select id="queryByUserid" resultMap="VolunteerMap">
+        select
+            id, name, telephone, email, reply, status, rid, publish_time, userid
+        from wxhelper.volunteer
+        where userid = #{userId}
+    </select>
+
+</mapper>

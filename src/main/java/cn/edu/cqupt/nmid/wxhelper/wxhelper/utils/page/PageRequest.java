@@ -12,15 +12,15 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "PageRequest",description = "分页请求类")
 public class PageRequest {
     /**
-     * 当前页码 默认为1
+     * 当前页码 默认为0
      */
-    @ApiModelProperty(value="当前页码",name="pageNum",example="1")
-    private int pageNum = 1;
+    @ApiModelProperty(value="当前页码",name="pageNum",example="0",required = false)
+    private int pageNum = 0;
     /**
-     * 每页数量 默认为5
+     * 每页数量 默认为0
      */
-    @ApiModelProperty(value="每页大小",name="pageSize",example="5")
-    private int pageSize = 5;
+    @ApiModelProperty(value="每页大小",name="pageSize",example="0",required = false)
+    private int pageSize = 0;
 
     public int getPageNum() {
         return pageNum;

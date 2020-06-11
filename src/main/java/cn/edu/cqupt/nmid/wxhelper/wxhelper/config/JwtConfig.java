@@ -29,6 +29,8 @@ public class JwtConfig {
 
     public static final String ROLE = "ROLE";
 
+    public static final String USERID = "userid";
+
     /**
      * 生成token
      * @param userid   用户id
@@ -41,6 +43,8 @@ public class JwtConfig {
 
             HashMap<String, Object> map = new HashMap<>();
             map.put(ROLE, role);
+            map.put(USERID,userid);
+
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setSubject(userid)
